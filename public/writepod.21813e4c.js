@@ -51982,10 +51982,37 @@ async function writeFileToPod(file, targetFileURL) {
     } // mimetype if known, fetch from the authenticated session
     );
 
-    console.log(`File saved at ${(0, _solidClient.getSourceUrl)(savedFile)}`);
+    const location = (0, _solidClient.getSourceUrl)(savedFile);
+    console.log(`File saved at ${location}`);
+    const sendToBackend = await sendPost(location);
+    console.log('Sent to backend ', sendToBackend);
+    const authFetch = await fetch('http://localhost:3001/fetch?resource=' + location).then(response => response.json()).then(data => console.log(data));
   } catch (error) {
     console.error(error);
   }
+}
+async function sendPost(fileInfo) {
+  const data = {
+    location: fileInfo
+  };
+  let resultIs = null;
+  await fetch('http://localhost:3001/api/newsong', {
+    credentials: 'include',
+    method: 'POST',
+    // or 'PUT'
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  }).then(response => response.json()).then(data => {
+    console.log('Success:', data);
+    resultIs = data;
+  }).catch(error => {
+    console.error('Error:', error);
+    resultIs = error;
+  }).finally(() => {
+    return resultIs;
+  });
 }
 },{"./ui":"ui.js","./login":"login.js","@inrupt/solid-client":"node_modules/@inrupt/solid-client/dist/index.es.js","@inrupt/vocab-common-rdf":"node_modules/@inrupt/vocab-common-rdf/dist/index.es.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -52012,7 +52039,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55142" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50962" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

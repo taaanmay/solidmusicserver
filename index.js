@@ -2,8 +2,9 @@ const express = require("express");
 const cookieSession = require("cookie-session");
 var path = require('path');
 var public = path.join(__dirname, 'public');
+var cors = require('cors')
 
-const { 
+const {
   getSessionFromStorage,
   getSessionIdFromStorageAll,
   Session
@@ -11,6 +12,15 @@ const {
 
 const app = express();
 const port = 3001;
+
+var corsOptions = {
+  origin: 'http://localhost:1234',
+  credentials: true,
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+app.use(cors(corsOptions))
+app.use(express.json());
 
 // The following snippet ensures that the server identifies each user's session
 // with a cookie using an express-specific mechanism
@@ -44,9 +54,10 @@ app.get("/login", async (req, res, next) => {
     // After login, the Solid Identity Provider will send the user back to the following
     // URL, with the data necessary to complete the authentication process
     // appended as query parameters:
-    redirectUrl: `http://localhost:${port}/redirect-from-solid-idp`,
+    redirectUrl: `http://localhost:${port}/home`,
     // Set to the user's Solid Identity Provider; e.g., "https://login.inrupt.com" 
-    oidcIssuer: "https://localhost:3000",
+    // oidcIssuer: "https://localhost:3000", // THROWS ERROR
+    oidcIssuer: "http://localhost:3000",
     // Pick an application name that will be shown when asked 
     // to approve the application's access to the requested data.
     clientName: "Demo app",
@@ -54,7 +65,7 @@ app.get("/login", async (req, res, next) => {
   });
 });
 
-app.get("/redirect-from-solid-idp", async (req, res) => {
+app.get("/home", async (req, res) => {
   // 3. If the user is sent back to the `redirectUrl` provided in step 2,
   //    it means that the login has been initiated and can be completed. In
   //    particular, initiating the login stores the session in storage, 
@@ -68,21 +79,30 @@ app.get("/redirect-from-solid-idp", async (req, res) => {
 
   // 5. `session` now contains an authenticated Session instance.
   if (session.info.isLoggedIn) {
-    return res.send(`<p>Logged in with the WebID ${session.info.webId}.</p>`)
+    res.redirect('/');
+    //return res.send(`<p>Logged in with the WebID ${session.info.webId}.</p>`)
   }
 });
 
 // 6. Once you are logged in, you can retrieve the session from storage, 
 //    and perform authenticated fetches.
 app.get("/fetch", async (req, res, next) => {
-  if(typeof req.query["resource"] === "undefined") {
+  console.log(req.query["resource"])
+  if (typeof req.query["resource"] === "undefined") {
     res.send(
       "<p>Please pass the (encoded) URL of the Resource you want to fetch using `?resource=&lt;resource URL&gt;`.</p>"
     );
   }
   const session = await getSessionFromStorage(req.session.sessionId);
-  console.log(await (await session.fetch(req.query["resource"])).text());
-  res.send("<p>Performed authenticated fetch.</p>");
+  if(session){
+    console.log(await (await session.fetch(req.query["resource"])).text());
+    res.send({sucess:"Performed authenticated fetch"});
+   
+  } else {
+    console.log('No session');
+    res.send({error:"unathorized"});
+  }
+  
 });
 
 // 7. To log out a session, just retrieve the session from storage, and 
@@ -106,6 +126,17 @@ app.get("/logout", async (req, res, next) => {
   );
 });*/
 app.use('/', express.static(public));
+
+const listSongs = [
+  { id: 1, location: "http://localhost:3000/mypod/getting-started/readingList/Lypofa2.m4a" },
+];
+
+app.post("/api/newsong", (req, res) => {
+  console.log(req.session)
+  const newSong = { id: listSongs.length + 1, location: req.body.location };
+  listSongs.push(newSong);
+  res.send(newSong);
+});
 
 app.listen(port, () => {
   console.log(
