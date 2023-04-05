@@ -1,8 +1,8 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
-var path = require('path');
-var public = path.join(__dirname, 'public');
-var cors = require('cors')
+const path = require('path');
+const public = path.join(__dirname, 'dist');
+const cors = require('cors')
 
 const {
   getSessionFromStorage,
@@ -13,7 +13,7 @@ const {
 const app = express();
 const port = 3001;
 
-var corsOptions = {
+const corsOptions = {
   origin: 'http://localhost:1234',
   credentials: true,
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -38,6 +38,8 @@ app.use(
 
 
 app.get("/login", async (req, res, next) => {
+
+  console.log(req.query["issuer"])
   // 1. Create a new Session
   const session = new Session();
   req.session.sessionId = session.info.sessionId;
@@ -57,10 +59,10 @@ app.get("/login", async (req, res, next) => {
     redirectUrl: `http://localhost:${port}/home`,
     // Set to the user's Solid Identity Provider; e.g., "https://login.inrupt.com" 
     // oidcIssuer: "https://localhost:3000", // THROWS ERROR
-    oidcIssuer: "http://localhost:3000",
+    oidcIssuer: req.query["issuer"] || "http://localhost:3000",
     // Pick an application name that will be shown when asked 
     // to approve the application's access to the requested data.
-    clientName: "Demo app",
+    clientName: "Server Auth",
     handleRedirect: redirectToSolidIdentityProvider,
   });
 });
@@ -79,7 +81,8 @@ app.get("/home", async (req, res) => {
 
   // 5. `session` now contains an authenticated Session instance.
   if (session.info.isLoggedIn) {
-    res.redirect('/');
+    //res.redirect('/?webid='+session.info.webId)
+    res.redirect('/')
     //return res.send(`<p>Logged in with the WebID ${session.info.webId}.</p>`)
   }
 });
@@ -113,6 +116,20 @@ app.get("/logout", async (req, res, next) => {
   res.send(`<p>Logged out.</p>`);
 });
 
+app.get("/myappid", async (req, res, next) => {  
+  var options = {
+    root: path.join(public)
+  };
+  
+  var fileName = 'myappid.jsonld';
+  res.sendFile(fileName, options, function (err) {
+      if (err) {
+          next(err);
+      } else {
+          console.log('Sent:', fileName);
+      }
+  });
+});
 // 8. On the server side, you can also list all registered sessions using the
 //    getSessionIdFromStorageAll function.
 /*app.get("/", async (req, res, next) => {
