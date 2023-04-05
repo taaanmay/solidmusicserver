@@ -116,6 +116,20 @@ app.get("/logout", async (req, res, next) => {
   res.send(`<p>Logged out.</p>`);
 });
 
+app.get("/myappid", async (req, res, next) => {  
+  var options = {
+    root: path.join(public)
+  };
+  
+  var fileName = 'myappid.jsonld';
+  res.sendFile(fileName, options, function (err) {
+      if (err) {
+          next(err);
+      } else {
+          console.log('Sent:', fileName);
+      }
+  });
+});
 // 8. On the server side, you can also list all registered sessions using the
 //    getSessionIdFromStorageAll function.
 /*app.get("/", async (req, res, next) => {
