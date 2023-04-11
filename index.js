@@ -1,7 +1,7 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
 const path = require('path');
-const public = path.join(__dirname, 'dist');
+const public = path.join(__dirname, 'app');
 const cors = require('cors')
 
 const {
