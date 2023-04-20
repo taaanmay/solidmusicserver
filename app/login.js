@@ -7,7 +7,7 @@ import {
     onSessionRestore
 } from '@inrupt/solid-client-authn-browser'
 
-export const session = getDefaultSession()
+export let session = getDefaultSession()
 
 // 1a. Start Login Process. Call login() function.
 function loginToSelectedIdP() {

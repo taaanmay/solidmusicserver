@@ -13,7 +13,7 @@ async function getMyPods() {
 
     // TODO: for localhost there's a problem when retrieving the pod url
     if (mypods.length === 0) {
-        mypods.push('http://localhost:3000/mypod/')
+        mypods.push('http://localhost:3000/mypod2/')
     }
 
     // Update the page with the retrieved values.
