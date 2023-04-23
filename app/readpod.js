@@ -7,7 +7,7 @@ import {
 } from '@inrupt/solid-client'
 
 // 2. Get Pod(s) associated with the WebID
-async function getMyPods() {
+export async function getMyPods() {
     const webID = document.getElementById('myWebID').value
     const mypods = await getPodUrlAll(webID, { fetch: session.fetch })
 
@@ -27,9 +27,9 @@ async function getMyPods() {
     })
 }
 
-buttonRead.onclick = function () {
-    getMyPods()
-}
+// buttonRead.onclick = function () {
+//     getMyPods()
+// }
 
 selectorPod.addEventListener('change', podSelectionHandler)
 function podSelectionHandler() {

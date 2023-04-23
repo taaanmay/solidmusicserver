@@ -1,5 +1,6 @@
 'use strict'
 import { buttonRead, buttonLogin, selectorIdP } from './ui'
+import {getMyPods} from './readpod'
 import {
     login,
     handleIncomingRedirect,
@@ -31,9 +32,11 @@ async function handleRedirectAfterLogin() {
     if (session.info.isLoggedIn) {
         // Update the page with the status.
         document.getElementById('myWebID').value = session.info.webId
-
+        document.getElementById('read').hidden = false
+        document.getElementById('write').hidden = false;
         // Enable Read button to read Pod URL
-        buttonRead.removeAttribute('disabled')
+        getMyPods()
+        //buttonRead.removeAttribute('disabled')
     } else {
 
     }

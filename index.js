@@ -38,8 +38,6 @@ app.use(
 
 
 app.get("/login", async (req, res, next) => {
-
-  console.log(req.query["issuer"])
   // 1. Create a new Session
   const session = new Session();
   req.session.sessionId = session.info.sessionId;
@@ -74,23 +72,26 @@ app.get("/home", async (req, res) => {
   //    which means it can be retrieved as follows.
   const session = await getSessionFromStorage(req.session.sessionId);
 
-  // 4. With your session back from storage, you are now able to 
-  //    complete the login process using the data appended to it as query
-  //    parameters in req.url by the Solid Identity Provider:
-  await session.handleIncomingRedirect(`http://localhost:${port}${req.url}`);
+  if(session){
+    // 4. With your session back from storage, you are now able to 
+    //    complete the login process using the data appended to it as query
+    //    parameters in req.url by the Solid Identity Provider:
+    await session.handleIncomingRedirect(`http://localhost:${port}${req.url}`);
 
-  // 5. `session` now contains an authenticated Session instance.
-  if (session.info.isLoggedIn) {
-    //res.redirect('/?webid='+session.info.webId)
-    res.redirect('/')
-    //return res.send(`<p>Logged in with the WebID ${session.info.webId}.</p>`)
+    // 5. `session` now contains an authenticated Session instance.
+    if (session.info.isLoggedIn) {
+      //res.redirect('/?webid='+session.info.webId)
+      res.redirect('/')
+      //return res.send(`<p>Logged in with the WebID ${session.info.webId}.</p>`)
+    }
   }
+  
 });
 
 // 6. Once you are logged in, you can retrieve the session from storage, 
 //    and perform authenticated fetches.
 app.get("/fetch", async (req, res, next) => {
-  console.log(req.query["resource"])
+  
   if (typeof req.query["resource"] === "undefined") {
     res.send(
       "<p>Please pass the (encoded) URL of the Resource you want to fetch using `?resource=&lt;resource URL&gt;`.</p>"
@@ -98,11 +99,10 @@ app.get("/fetch", async (req, res, next) => {
   }
   const session = await getSessionFromStorage(req.session.sessionId);
   if(session){
-    console.log(await (await session.fetch(req.query["resource"])).text());
+    //console.log(await (await session.fetch(req.query["resource"])).text());
     res.send({sucess:"Performed authenticated fetch"});
    
   } else {
-    console.log('No session');
     res.send({error:"unathorized"});
   }
   
@@ -148,11 +148,21 @@ const listSongs = [
   { id: 1, location: "http://localhost:3000/mypod/getting-started/readingList/Lypofa2.m4a" },
 ];
 
-app.post("/api/newsong", (req, res) => {
-  console.log(req.session)
+app.post("/api/newsong", async (req, res) => {
+  console.log('req.session',req.session)
+  const sessionIds = await getSessionIdFromStorageAll();
+  for(const sessionId of sessionIds) {
+    console.log('sessionId', sessionId)
+    // Do something with the session ID...
+  }
   const newSong = { id: listSongs.length + 1, location: req.body.location };
   listSongs.push(newSong);
   res.send(newSong);
+});
+
+app.get("/api/getsongs", (req, res) => {
+  console.log(req.session)
+  res.send(listSongs);
 });
 
 app.listen(port, () => {

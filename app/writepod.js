@@ -1,5 +1,5 @@
 'use strict'
-import { labelCreateStatus, buttonCreate } from './ui'
+import { labelCreateStatus, buttonCreate, labelItemLocalStored, buttonCheckAccess } from './ui'
 import { session } from './login'
 
 import {
@@ -19,6 +19,8 @@ import {
 
 import { SCHEMA_INRUPT, RDF, AS } from '@inrupt/vocab-common-rdf'
 
+const mediaContentPath = 'Media-Content/NewAlbum/'
+let sellerObj  = {}
 
 // 3. Create the Reading List
 async function createList() {
@@ -28,9 +30,10 @@ async function createList() {
     // For simplicity and brevity, this tutorial hardcodes the  SolidDataset URL.
     // In practice, you should add in your profile a link to this resource
     // such that applications can follow to find your list.
-    const readingListUrl = `${SELECTED_POD}getting-started/readingList/myList`
+    const readingListUrl = `${SELECTED_POD}${mediaContentPath}new_item`
 
-    let titles = document.getElementById('titles').value.split('\n')
+    //let titles = document.getElementById('price').value.split('\n')
+    let titles = document.getElementById('price').value
 
     // Fetch or create a new reading list.
     let myReadingList
@@ -54,16 +57,20 @@ async function createList() {
     }
 
     // Add titles to the Dataset
-    let i = 0
-    titles.forEach((title) => {
-        if (title.trim() !== '') {
-            let item = createThing({ name: 'title' + i })
-            item = addUrl(item, RDF.type, AS.Article)
-            item = addStringNoLocale(item, SCHEMA_INRUPT.name, title)
-            myReadingList = setThing(myReadingList, item)
-            i++
-        }
-    })
+    // let i = 0
+    // titles.forEach((title) => {
+    //     if (title.trim() !== '') {
+    //         let item = createThing({ name: 'price' + i })
+    //         item = addUrl(item, RDF.type, AS.Article)
+    //         item = addStringNoLocale(item, SCHEMA_INRUPT.productID, title)
+    //         myReadingList = setThing(myReadingList, item)
+    //         i++
+    //     }
+    // })
+    let item = createThing({ name: 'price'})
+    item = addUrl(item, RDF.type, AS.Article)
+    item = addStringNoLocale(item, SCHEMA_INRUPT.productID, titles)
+    myReadingList = setThing(myReadingList, item)
 
     try {
         // Save the SolidDataset
@@ -81,12 +88,20 @@ async function createList() {
         let items = getThingAll(savedReadingList)
 
         let listcontent = ''
-        for (let i = 0; i < items.length; i++) {
-            let item = getStringNoLocale(items[i], SCHEMA_INRUPT.name)
-            if (item !== null) {
-                listcontent += item + '\n'
-            }
+        let item = getStringNoLocale(items[0], SCHEMA_INRUPT.productID)
+        if (item !== null) {
+            listcontent = item
         }
+        // let listcontent = ''
+        // for (let i = 0; i < items.length; i++) {
+        //     let item = getStringNoLocale(items[i], SCHEMA_INRUPT.productID)
+        //     if (item !== null) {
+        //         //listcontent += item + '\n'
+        //         listcontent += item 
+        //     }
+        // }
+        sellerObj.price = listcontent
+        sellerObj.webId = session.info.webId
 
         document.getElementById('savedtitles').value = listcontent
     } catch (error) {
@@ -150,7 +165,7 @@ function handleFiles(files) {
     const fileList = Array.from(files)
 
     fileList.forEach(file => {
-        writeFileToPod(file, `${MY_POD_URL}getting-started/readingList/${file.name}`);
+        writeFileToPod(file, `${MY_POD_URL}${mediaContentPath}${file.name}`);
     });
 }
 
@@ -166,12 +181,10 @@ async function writeFileToPod(file, targetFileURL) {
         );
         const location = getSourceUrl(savedFile)
         console.log(`File saved at ${location}`);
+        sellerObj.resourceUrl = location
+        localStorage.setItem('myResource', JSON.stringify(sellerObj));
         const sendToBackend = await sendPost(location) // needs to be fixed
         console.log('Sent to backend ', sendToBackend)
-        const authFetch = await fetch('http://localhost:3001/fetch?resource='+location)
-        .then((response) => response.json())
-        .then((data) => console.log(data));
-
     } catch (error) {
         console.error(error);
     }
@@ -198,4 +211,20 @@ async function sendPost(fileInfo){
         return error
     })
     
+}
+
+async function checkAccessResource(location){
+    await fetch('http://localhost:3001/fetch?resource='+location)
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+}
+
+const theResource = localStorage.getItem('myResource')
+
+console.log(theResource)
+if(theResource){
+    labelItemLocalStored.innerHTML = theResource
+    buttonCheckAccess.addEventListener('click', async function() {
+        await checkAccessResource(theResource)
+    })
 }

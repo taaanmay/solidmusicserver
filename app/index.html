@@ -3,81 +3,118 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Getting Started: Inrupt JavaScript Client Libraries</title>
+    <title>BuyWatch</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
     <header>
-        <h2>Getting Started</h2>
-        <h3>with Inrupt JavaScript Client Libraries</h3>
+        <h2>BuyWatch POC</h2>
+        <h3>SOLID + Web Monetization </h3>
     </header>
-    <section id="login" class="panel">
-        <div class="row">
-            <label id="labelIdP" for="select-idp">1. Select your Identity Provider: </label>
-            <select id="select-idp" name="select-idp">
-                <option value="">--Please select an Identity Provider (IdP)--</option>
-                <!-- Update the select-idp option if not using PodSpaces -->
-                <option value="http://localhost:3000">http://localhost:3000 (MashLib)</option>
-                <option value="https://solidcommunity.net">https://solidcommunity.net (Solid Community)</option>
-                <option value="https://login.inrupt.com">https://login.inrupt.com (PodSpaces)</option>
+    <div class="wrapper">
+        <div class="tabs">
+            <div class="tab">
+                <input type="radio" name="css-tabs" id="tab-1" checked class="tab-switch">
+                <label for="tab-1" class="tab-label">Login</label>
+                <div class="tab-content">
+                    <section id="login" class="panel">
+                        <div class="row">
+                            <label id="labelIdP" for="select-idp">1. Select your Identity Provider: </label>
+                            <select id="select-idp" name="select-idp">
+                                <option value="">--Please select an Identity Provider (IdP)--</option>
+                                <!-- Update the select-idp option if not using PodSpaces -->
+                                <option value="http://localhost:3000">http://localhost:3000 (MashLib)</option>
+                                <option value="https://solidcommunity.net">https://solidcommunity.net (Solid Community)
+                                </option>
+                                <option value="https://login.inrupt.com">https://login.inrupt.com (PodSpaces)</option>
 
 
-            </select>
-            <button name="btnLogin" id="btnLogin">Login</button>
-        </div>
-    </section>
+                            </select>
+                            <button name="btnLogin" id="btnLogin">Login</button>
+                        </div>
+                    </section>
+                    <div id="read" class="panel" hidden>
+                        <div class="row">
+                            <label id="readlabel" for="myWebID">2. Logged in with your WebID: </label>
+                            <input type="text" id="myWebID" name="myWebID" size="50" disabled>
 
-    <div id="read" class="panel">
-        <div class="row">
-            <label id="readlabel" for="myWebID">2. Logged in with your WebID: </label>
-            <input type="text" id="myWebID" name="myWebID" size="50" disabled>
-
-            <button name="btnRead" id="btnRead">Get Pod URL(s)</button>
-        </div>
-    </div>
-
-    <div id="write" class="panel">
-        <div class="row">
-            <label id="writelabel">3.Create a private reading list in my Pod.</label>
-        </div>
-        <br>
-        <div class="row">
-            <div>
-                <label id="podlabel" for="select-pod">a. Write to your Pod: </label>
-
-                <select id="select-pod" name="select-pod" widths: 120>
-                    <option value="">--Please select your Pod--</option>
-                </select>getting-started/readingList/myList
+                            <!-- <button name="btnRead" id="btnRead">Get Pod URL(s)</button> -->
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <br>
-        <div class="row">
-            <div>
-                <label id="listLabel" for="titles">b. Enter items to read: </label>
-                <textarea id="titles" name="titles" rows="5" cols="42">
+            <div class="tab">
+                <input type="radio" name="css-tabs" id="tab-2" class="tab-switch">
+                <label for="tab-2" class="tab-label">Upload Form</label>
+                <div class="tab-content">
+                    <div id="write" class="panel" hidden>
+                        <div class="row">
+                            <label id="writelabel">3. Fill the form.</label>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div>
+                                <label id="podlabel" for="select-pod">a. New Media in your Pod: </label>
+
+                                <select id="select-pod" name="select-pod" widths: 120>
+                                    <option value="">--Please select your Pod--</option>
+                                </select>Media-Content/NewAlbum/new_item
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div>
+                                <label id="listLabel" for="titles">b. Select a Price: </label>
+                                <input type="number" step="0.01" class="form-control" name="price" id="price"
+                                    placeholder="How much does this cost" value="0" required>
+                                <!-- <textarea id="titles" name="titles" rows="5" cols="42">
                     Leaves of Grass
                     RDF 1.1 Primer
-                </textarea>                
-                <button name="btnCreate" id="btnCreate">Create</button>
+                </textarea>                 -->
+                                <button name="btnCreate" id="btnCreate">Add Price</button>
+
+                            </div>
+
+                            <!-- Should update here:
+               <input type="file" id="fileinput" />        -->
+                            <br>
+                        </div>
+                        <div class="row">
+                            <label id="dropContainerLabel" for="dropContainer">c. Drop Here the File: </label>
+                            <div id="dropContainer" style="border:1px solid black;height:150px;">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div id="results" class="panel" hidden>
+                        <div class="row">
+                            <label>Create Reading List Status</label>
+                            <span id="labelCreateStatus"></span>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <label id="labelRetrieved" for="savedtitles">Retrieved to validate::</label>
+                                <textarea id="savedtitles" name="savedtitles" rows="5" cols="42" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="dropContainer" style="border:1px solid black;height:100px;">
-                Drop Here
-             </div>
-               Should update here:
-               <input type="file" id="fileinput" />       
-            <br>
-        </div>
-    </div>
-    <div id="results" class="panel">
-        <div class="row">
-            <label>Create Reading List Status</label>
-            <span id="labelCreateStatus"></span>
-        </div>
-        <div class="row">
-            <div>
-                <label id="labelRetrieved" for="savedtitles">Retrieved to validate::</label>
-                <textarea id="savedtitles" name="savedtitles" rows="5" cols="42" disabled></textarea>
+            <div class="tab">
+                <input type="radio" name="css-tabs" id="tab-3" class="tab-switch">
+                <label for="tab-3" class="tab-label">Market</label>
+                <div class="tab-content">
+
+
+                    <div id="localStoraged" class="panel">
+                        <div class="row">
+                            <label>Available Content: </label>
+                            <span id="itemSaved"></span>
+                            <button name="btnCheckAccess" id="btnCheckAccess">$Buy</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
